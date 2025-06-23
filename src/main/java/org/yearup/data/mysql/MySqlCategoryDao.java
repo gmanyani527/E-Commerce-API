@@ -8,20 +8,23 @@ import javax.sql.DataSource;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 @Component
 public class MySqlCategoryDao extends MySqlDaoBase implements CategoryDao
 {
+    private JdbcTemplate jdbcTemplate;
     public MySqlCategoryDao(DataSource dataSource)
     {
+
         super(dataSource);
     }
 
     @Override
     public List<Category> getAllCategories()
     {
-        // get all categories
-        return null;
+        String sql = "SELECT * FROM categories";
+        return jdbcTemplate.query(sql, (row, rowNum) -> mapRow(row));
     }
 
     @Override
