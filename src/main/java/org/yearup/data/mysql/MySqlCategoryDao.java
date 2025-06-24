@@ -14,10 +14,12 @@ import org.springframework.jdbc.core.JdbcTemplate;
 public class MySqlCategoryDao extends MySqlDaoBase implements CategoryDao
 {
     private JdbcTemplate jdbcTemplate;
+
     public MySqlCategoryDao(DataSource dataSource)
     {
 
         super(dataSource);
+        this.jdbcTemplate = new JdbcTemplate(dataSource);
     }
 
     @Override
@@ -25,6 +27,7 @@ public class MySqlCategoryDao extends MySqlDaoBase implements CategoryDao
     {
         String sql = "SELECT * FROM categories";
         return jdbcTemplate.query(sql, (row, rowNum) -> mapRow(row));
+
     }
 
     @Override
