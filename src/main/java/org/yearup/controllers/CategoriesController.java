@@ -50,10 +50,15 @@ public class CategoriesController
     // add the appropriate annotation for a get action
     public ResponseEntity<Category> getById(@PathVariable int id)
     {
-        // get the category by id
+        if (id <= 0) {
+            return ResponseEntity.badRequest().build();
+        }
+
         Category category = categoryDao.getById(id);
-        if (category == null)
+        if (category == null) {
             return ResponseEntity.notFound().build();
+        }
+
         return ResponseEntity.ok(category);
     }
 
@@ -102,6 +107,6 @@ public class CategoriesController
             return ResponseEntity.notFound().build();
 
         categoryDao.delete(id);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 }

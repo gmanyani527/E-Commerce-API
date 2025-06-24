@@ -1,5 +1,10 @@
 package org.yearup.data.mysql;
 
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.Statement;
 import org.springframework.stereotype.Component;
 import org.yearup.data.CategoryDao;
 import org.yearup.models.Category;
@@ -38,19 +43,37 @@ public class MySqlCategoryDao extends MySqlDaoBase implements CategoryDao
     public Category getById(int categoryId)
     {
         String sql = "SELECT * FROM categories WHERE category_id = ?";
-        return jdbcTemplate.queryForObject(sql, (rs, rowNum) ->
-                new Category(
-                        rs.getInt("category_id"),
-                        rs.getString("name"),
-                        rs.getString("description")
-                ), categoryId);
+        try {
+            return jdbcTemplate.queryForObject(sql, (rs, rowNum) ->
+                    new Category(
+                            rs.getInt("category_id"),
+                            rs.getString("name"),
+                            rs.getString("description")
+                    ), categoryId);
+        }
+        catch(org.springframework.dao.EmptyResultDataAccessException e){
+            return null;
+        }
+
     }
+
 
     @Override
     public Category create(Category category)
     {
         String sql = "INSERT INTO categories (name, description) VALUES (?, ?)";
-        jdbcTemplate.update(sql, category.getName(), category.getDescription());
+
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+
+        jdbcTemplate.update(connection -> {
+            PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            ps.setString(1, category.getName());
+            ps.setString(2, category.getDescription());
+            return ps;
+        }, keyHolder);
+
+        int generatedId = keyHolder.getKey().intValue();
+        category.setCategoryId(generatedId);
         return category;
     }
 
