@@ -26,16 +26,24 @@ public class MySqlCategoryDao extends MySqlDaoBase implements CategoryDao
     public List<Category> getAllCategories()
     {
         String sql = "SELECT * FROM categories";
-        return jdbcTemplate.query(sql, (row, rowNum) -> mapRow(row));
-
+        return jdbcTemplate.query(sql, (rs, rowNum) ->
+                new Category(
+                        rs.getInt("category_id"),
+                        rs.getString("name"),
+                        rs.getString("description")
+                ));
     }
 
     @Override
     public Category getById(int categoryId)
     {
-        // get category by id
         String sql = "SELECT * FROM categories WHERE category_id = ?";
-        return jdbcTemplate.queryForObject(sql, (row, rowNum) -> mapRow(row), categoryId);
+        return jdbcTemplate.queryForObject(sql, (rs, rowNum) ->
+                new Category(
+                        rs.getInt("category_id"),
+                        rs.getString("name"),
+                        rs.getString("description")
+                ), categoryId);
     }
 
     @Override
