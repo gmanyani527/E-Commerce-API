@@ -11,12 +11,16 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+
 @Component
 public class MySqlUserDao extends MySqlDaoBase implements UserDao
 {
+   
+
     @Autowired
     public MySqlUserDao(DataSource dataSource)
     {
+
         super(dataSource);
     }
 
@@ -155,4 +159,28 @@ public class MySqlUserDao extends MySqlDaoBase implements UserDao
 
         return new User(userId, username,hashedPassword, role);
     }
+
+    @Override
+    public User getByUsername(String username)
+    {
+        DatabaseMetaData dataSource = null;
+        try (Connection conn = dataSource.getConnection())
+        {
+            String sql = "SELECT * FROM users WHERE username = ?";
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.setString(1, username);
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next())
+            {
+                return mapRow(rs);
+            }
+            return null;
+        }
+        catch (SQLException e)
+        {
+            throw new RuntimeException(e);
+        }
+    }
+
 }
