@@ -1,6 +1,7 @@
 package org.yearup.data.mysql;
 
 
+import org.springframework.stereotype.Repository;
 import org.yearup.data.ShoppingCartDao;
 import org.yearup.models.ShoppingCart;
 import org.yearup.models.ShoppingCartItem;
@@ -10,6 +11,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+@Repository
 public class MySqlShoppingCartDao implements ShoppingCartDao
 {
     private final DataSource dataSource;
@@ -64,7 +66,28 @@ public class MySqlShoppingCartDao implements ShoppingCartDao
 
     @Override
     public List<ShoppingCartItem> getCartItemsByUserId(int userId) {
-        // SELECT * FROM shopping_cart WHERE user_id = ...
-        return new ArrayList<>();
+        List<ShoppingCartItem> items = new ArrayList<>();
+
+        String sql = "SELECT * FROM shopping_cart WHERE user_id = ?";
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, userId);
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                ShoppingCartItem item = new ShoppingCartItem();
+                item.setUserId(rs.getInt("user_id"));
+                item.setProductId(rs.getInt("product_id"));
+                item.setQuantity(rs.getInt("quantity"));
+                // add more fields if needed
+
+                items.add(item);
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Error fetching shopping cart items", e);
+        }
+
+        return items;
     }
 }

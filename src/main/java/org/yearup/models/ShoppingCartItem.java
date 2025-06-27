@@ -6,6 +6,8 @@ import java.math.BigDecimal;
 
 public class ShoppingCartItem
 {
+    private int userId;
+    private int productId;
     private Product product = null;
     private int quantity = 1;
     private BigDecimal discountPercent = BigDecimal.ZERO;
@@ -56,5 +58,13 @@ public class ShoppingCartItem
         BigDecimal discountAmount = subTotal.multiply(discountPercent);
 
         return subTotal.subtract(discountAmount);
+    }
+
+    public void setUserId(int userId) {
+        this.userId = userId;
+    }
+
+    public void setProductId(int productId) {
+        this.productId = productId;
     }
 }
