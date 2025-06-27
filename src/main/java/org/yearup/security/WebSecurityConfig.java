@@ -68,6 +68,12 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
 
                 .and()
+                .authorizeRequests()
+                .antMatchers("/auth/**").permitAll()                // Public endpoints (e.g., login/register)
+                .antMatchers("/cart/**").authenticated()            // ✅ Require authentication for cart endpoints
+                .anyRequest().permitAll()
+
+                .and()
                 .apply(securityConfigurerAdapter());
     }
 

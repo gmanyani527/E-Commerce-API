@@ -13,26 +13,22 @@ import java.util.List;
 
 
 @Component
-public class MySqlUserDao extends MySqlDaoBase implements UserDao
-{
-   
+public class MySqlUserDao extends MySqlDaoBase implements UserDao {
+
 
     @Autowired
-    public MySqlUserDao(DataSource dataSource)
-    {
+    public MySqlUserDao(DataSource dataSource) {
 
         super(dataSource);
     }
 
 
     @Override
-    public User create(User newUser)
-    {
+    public User create(User newUser) {
         String sql = "INSERT INTO users (username, hashed_password, role) VALUES (?, ?, ?)";
         String hashedPassword = new BCryptPasswordEncoder().encode(newUser.getPassword());
 
-        try (Connection connection = getConnection())
-        {
+        try (Connection connection = getConnection()) {
             PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
             ps.setString(1, newUser.getUsername());
             ps.setString(2, hashedPassword);
@@ -40,38 +36,31 @@ public class MySqlUserDao extends MySqlDaoBase implements UserDao
 
             ps.executeUpdate();
 
-            User user = getByUserName(newUser.getUsername());
+            User user = getByUsername(newUser.getUsername());
             user.setPassword("");
 
             return user;
 
-        }
-        catch (SQLException e)
-        {
+        } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
 
     @Override
-    public List<User> getAll()
-    {
+    public List<User> getAll() {
         List<User> users = new ArrayList<>();
 
         String sql = "SELECT * FROM users";
-        try (Connection connection = getConnection())
-        {
+        try (Connection connection = getConnection()) {
             PreparedStatement statement = connection.prepareStatement(sql);
 
             ResultSet row = statement.executeQuery();
 
-            while (row.next())
-            {
+            while (row.next()) {
                 User user = mapRow(row);
                 users.add(user);
             }
-        }
-        catch (SQLException e)
-        {
+        } catch (SQLException e) {
             throw new RuntimeException(e);
         }
 
@@ -79,51 +68,41 @@ public class MySqlUserDao extends MySqlDaoBase implements UserDao
     }
 
     @Override
-    public User getUserById(int id)
-    {
+    public User getUserById(int id) {
         String sql = "SELECT * FROM users WHERE user_id = ?";
-        try (Connection connection = getConnection())
-        {
+        try (Connection connection = getConnection()) {
             PreparedStatement statement = connection.prepareStatement(sql);
             statement.setInt(1, id);
 
             ResultSet row = statement.executeQuery();
 
-            if(row.next())
-            {
+            if (row.next()) {
                 User user = mapRow(row);
                 return user;
             }
-        }
-        catch (SQLException e)
-        {
+        } catch (SQLException e) {
             throw new RuntimeException(e);
         }
         return null;
     }
 
     @Override
-    public User getByUserName(String username)
-    {
+    public User getByUsername(String username) {
         String sql = "SELECT * " +
                 " FROM users " +
                 " WHERE username = ?";
 
-        try (Connection connection = getConnection())
-        {
+        try (Connection connection = getConnection()) {
             PreparedStatement statement = connection.prepareStatement(sql);
             statement.setString(1, username);
 
             ResultSet row = statement.executeQuery();
-            if(row.next())
-            {
+            if (row.next()) {
 
                 User user = mapRow(row);
                 return user;
             }
-        }
-        catch (SQLException e)
-        {
+        } catch (SQLException e) {
             System.out.println(e);
         }
 
@@ -131,12 +110,10 @@ public class MySqlUserDao extends MySqlDaoBase implements UserDao
     }
 
     @Override
-    public int getIdByUsername(String username)
-    {
-        User user = getByUserName(username);
+    public int getIdByUsername(String username) {
+        User user = getByUsername(username);
 
-        if(user != null)
-        {
+        if (user != null) {
             return user.getId();
         }
 
@@ -144,43 +121,38 @@ public class MySqlUserDao extends MySqlDaoBase implements UserDao
     }
 
     @Override
-    public boolean exists(String username)
-    {
-        User user = getByUserName(username);
+    public boolean exists(String username) {
+        User user = getByUsername(username);
         return user != null;
     }
 
-    private User mapRow(ResultSet row) throws SQLException
-    {
+    private User mapRow(ResultSet row) throws SQLException {
         int userId = row.getInt("user_id");
         String username = row.getString("username");
         String hashedPassword = row.getString("hashed_password");
         String role = row.getString("role");
 
-        return new User(userId, username,hashedPassword, role);
+        return new User(userId, username, hashedPassword, role);
     }
 
-    @Override
-    public User getByUsername(String username)
-    {
-        DatabaseMetaData dataSource = null;
-        try (Connection conn = dataSource.getConnection())
-        {
-            String sql = "SELECT * FROM users WHERE username = ?";
-            PreparedStatement stmt = conn.prepareStatement(sql);
+  /*  @Override
+    public User getByUsername(String username) {
+        String sql = "SELECT * FROM users WHERE username = ?";
+
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
             stmt.setString(1, username);
             ResultSet rs = stmt.executeQuery();
 
-            if (rs.next())
-            {
+            if (rs.next()) {
                 return mapRow(rs);
             }
-            return null;
-        }
-        catch (SQLException e)
-        {
+        } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-    }
 
+        return null;
+
+    } */
 }
