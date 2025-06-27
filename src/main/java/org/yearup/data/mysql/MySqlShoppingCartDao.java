@@ -47,7 +47,14 @@ public class MySqlShoppingCartDao implements ShoppingCartDao
 
     @Override
     public void clearCart(int userId) {
-        // DELETE FROM shopping_cart WHERE ...
+        String sql = "DELETE FROM shopping_cart WHERE user_id = ?";
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, userId);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException("Error clearing cart", e);
+        }
     }
 
     @Override
